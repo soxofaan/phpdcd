@@ -56,6 +56,7 @@ spl_autoload_register(
               'sebastianbergmann\\phpdcd\\cli\\application' => '/CLI/Application.php',
               'sebastianbergmann\\phpdcd\\cli\\command' => '/CLI/Command.php',
               'sebastianbergmann\\phpdcd\\detector' => '/Detector.php',
+              'sebastianbergmann\\phpdcd\\log\\htmlreport' => '/Log/HtmlReport.php',
               'sebastianbergmann\\phpdcd\\log\\text' => '/Log/Text.php'
             );
         }

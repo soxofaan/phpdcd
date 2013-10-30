@@ -45,6 +45,7 @@ namespace SebastianBergmann\PHPDCD\CLI;
 
 use SebastianBergmann\PHPDCD\Detector;
 use SebastianBergmann\PHPDCD\Log\Text;
+use SebastianBergmann\PHPDCD\Log\HtmlReport;
 use SebastianBergmann\FinderFacade\FinderFacade;
 use Symfony\Component\Console\Command\Command as AbstractCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -106,6 +107,12 @@ class Command extends AbstractCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Show a progress bar while analysing files'
+             )
+             ->addOption(
+                'htmlreport',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Export results in HTML format'
              );
     }
 
@@ -155,6 +162,12 @@ class Command extends AbstractCommand
 
         if ($progressBar) {
             $progressBar->finish();
+        }
+
+        if ($input->getOption('htmlreport'))
+        {
+            $htmlReport = new HtmlReport();
+            $htmlReport->exportResult($input->getOption('htmlreport'), $result);
         }
 
         if (!$quiet) {
