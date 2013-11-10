@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PHPDCD Report</title>
+    <style>
+        code.function {
+            color: #004b80;
+        }
+
+        .info {
+            color: #444444;
+            font-size: 80%;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>PHPDCD Report</h1>
+    <ul>
+        {% for name, info in result %}
+            <li>
+                <code class="function">{{ name }}</code>
+                <span class=info">declared in {{ info.file }}:{{ info.line }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+</body>
+</html>

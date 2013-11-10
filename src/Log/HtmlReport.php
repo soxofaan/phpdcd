@@ -55,52 +55,16 @@ class HtmlReport
 {
     public function exportResult($filename, array $result)
     {
+
+        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/HtmlReport/templates');
+        $twig = new \Twig_Environment($loader);
+
+
+        $html = $twig->render('report.twig', array('result' => $result));
+
         // TODO: make sure parent dir(s) exist.
         $f = fopen($filename, 'w');
-
-        // TODO: do this with a proper template system.
-        // Header part
-        fwrite($f,
-            '<!DOCTYPE html>
-            <html>
-                <head>
-                    <title>PHPDCD Report</title>
-                    <style>
-                        code.function {
-                            color: #004b80;
-                        }
-                        .info {
-                            color: #444444;
-                            font-size: 80%;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>PHPDCD Report</h1>
-                        <ul>
-            '
-        );
-
-        // Render the entries.
-        foreach ($result as $name => $source) {
-            fwrite($f,
-                sprintf(
-                    '<li><code class="function">%s()</code> <span class="info">declared in %s:%d</span></li>' . "\n",
-                    $name, $source['file'], $source['line']
-                )
-            );
-        }
-
-        // Footer part.
-        fwrite(
-            $f,
-            '            </ul>
-                    </div>
-                </body>
-            </html>
-            '
-        );
+        fwrite($f, $html);
         fclose($f);
 
     }
