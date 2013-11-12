@@ -16,6 +16,12 @@
 
     <h2>Dead functions and methods</h2>
 
+    <p>
+        Could not find directly inferable calls to <span class="badge">{{ result|length }}</span> functions/methods:
+        <span class="badge">{{ totalLoc }}</span> lines of code in <span class="badge">{{ fileCount }}</span> files.
+    </p>
+
+
     <table class="table table-condensed table-hover phpdcd-results">
         <thead>
         <tr>
@@ -31,9 +37,7 @@
                 <td><code>{{ name }}</code></td>
                 <td>{{ info.loc }}</td>
                 <td>
-                    <span data-toggle="tooltip" class="full-file-name" title="{{ info.file }}">
-                        {{ info.file|basename }}
-                    </span>:{{ info.line }}
+                    <span data-toggle="tooltip" class="full-file-name" title="{{ info.file }}">{{ info.file|basename }}</span>:{{ info.line }}
                     {#<span title="{{ info.file }}">{{ info.file|basename }}</span>:{{ info.line }}#}
                 </td>
             </tr>

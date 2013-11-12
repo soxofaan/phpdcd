@@ -73,6 +73,14 @@ class HtmlReport
         // Add some extra filters
         $twig->addFilter(new \Twig_SimpleFilter('basename', 'basename'));
 
+        $totalLoc = 0;
+        $files = array();
+        foreach ($result as $item) {
+            $totalLoc += $item['loc'];
+            $files[$item['file']] = true;
+        }
+        $fileCount = count($files);
+
         // Render report template.
         $html = $twig->render(
             'report.twig',
@@ -81,12 +89,14 @@ class HtmlReport
                 'version' => $this->phpdcdVersion,
                 'php_version' => PHP_VERSION,
                 'date' => date('Y-m-d H:i:s'),
+                'totalLoc' => $totalLoc,
+                'fileCount' => $fileCount,
             )
         );
 
-        $exportPath = $this->ensureDirectory($exportPath);
 
         // Store report.
+        $exportPath = $this->ensureDirectory($exportPath);
         $htmlFilename = $this->pathJoin($exportPath, 'index.html');
         $f = fopen($htmlFilename, 'w');
         fwrite($f, $html);
