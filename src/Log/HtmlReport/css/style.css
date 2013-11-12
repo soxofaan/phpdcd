@@ -1,0 +1,21 @@
+
+th[data-sort] {
+    cursor: pointer;
+}
+
+.sorting-asc, .sorting-desc {
+    background-color: #ddeeff;
+}
+
+.sorting-asc .title:after {
+    content: " \25B2";
+}
+
+.sorting-desc .title:after {
+    content: " \25BC";
+}
+
+
+.tooltip-inner {
+    max-width: 500px;
+}

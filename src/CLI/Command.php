@@ -112,7 +112,7 @@ class Command extends AbstractCommand
                 'htmlreport',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Export results in HTML format'
+                'Export results in HTML format to specified directory.'
              );
     }
 
@@ -166,7 +166,7 @@ class Command extends AbstractCommand
 
         if ($input->getOption('htmlreport'))
         {
-            $htmlReport = new HtmlReport();
+            $htmlReport = new HtmlReport($this->getApplication()->getVersion());
             $htmlReport->exportResult($input->getOption('htmlreport'), $result);
         }
 

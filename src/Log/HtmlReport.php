@@ -53,19 +53,143 @@ namespace SebastianBergmann\PHPDCD\Log;
  */
 class HtmlReport
 {
-    public function exportResult($filename, array $result)
+    /**
+     * Root path of HTML resources (templates, css, js, ...)
+     * @var string
+     */
+    protected $resourcePath;
+
+    public function __construct($phpdcdVersion=null)
     {
+        $this->phpdcdVersion = $phpdcdVersion;
+        $this->resourcePath = $this->pathJoin(dirname(__FILE__), 'HtmlReport');
+    }
 
-        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/HtmlReport/templates');
-        $twig = new \Twig_Environment($loader);
+    public function exportResult($exportPath, array $result)
+    {
+        // Set up Twig for template rendering.
+        $loader = new \Twig_Loader_Filesystem($this->pathJoin($this->resourcePath, 'templates'));
+        $twig = new \Twig_Environment($loader, array('strict_variables' => true));
+        // Add some extra filters
+        $twig->addFilter(new \Twig_SimpleFilter('basename', 'basename'));
 
+        // Render report template.
+        $html = $twig->render(
+            'report.twig',
+            array(
+                'result' => $result,
+                'version' => $this->phpdcdVersion,
+                'php_version' => PHP_VERSION,
+                'date' => date('Y-m-d H:i:s'),
+            )
+        );
 
-        $html = $twig->render('report.twig', array('result' => $result));
+        $exportPath = $this->ensureDirectory($exportPath);
 
-        // TODO: make sure parent dir(s) exist.
-        $f = fopen($filename, 'w');
+        // Store report.
+        $htmlFilename = $this->pathJoin($exportPath, 'index.html');
+        $f = fopen($htmlFilename, 'w');
         fwrite($f, $html);
         fclose($f);
+        $this->copyStaticFiles($exportPath);
+    }
 
+    protected function copyStaticFiles($exportPath)
+    {
+        // (Sub)tree to copy from resource directory to export path.
+        $toCopy = array(
+            'css' => array(
+                'style.css',
+                'lib' => array(
+                    'bootstrap.min.css',
+                )
+            ),
+            'js' => array(
+                'lib' => array(
+                    'jquery-2.0.3.min.js',
+                    'bootstrap.min.js',
+                    'Stupid-Table-Plugin' => array(
+                        'stupidtable.min.js',
+                        'LICENSE',
+                    ),
+                ),
+            ),
+        );
+
+        // Do copying of the tree recursively with a closure.
+        $resourceCopier = function ($from, $to, $toCopy) use (&$resourceCopier) {
+            foreach ($toCopy as $name => $item) {
+                if (is_array($item)) {
+                    $resourceCopier(
+                        $this->pathJoin($from, $name),
+                        $this->ensureDirectory($this->pathJoin($to, $name)),
+                        $item
+                    );
+                } else {
+                    $r = @copy($this->pathJoin($from, $item), $this->pathJoin($to, $item));
+                    if (!$r) {
+                        throw new \RuntimeException(
+                            sprintf(
+                                'Failed to mare copy resource directory "%s" from "%s" to "%s".',
+                                $item,
+                                $from,
+                                $to
+                            )
+                        );
+
+                    }
+                }
+            }
+        };
+
+        $resourceCopier($this->resourcePath, $exportPath, $toCopy);
+    }
+
+    /**
+     * Helper function to join path components together to a full path.
+     * @return string
+     */
+    public function pathJoin()
+    {
+        // Get given path components.
+        $components = func_get_args();
+        // Handle single array argument use case.
+        if (count($components) == 1 && is_array($components[0])) {
+            $components = $components[0];
+        }
+        // Build path.
+        $path = array_shift($components);
+        foreach ($components as $component) {
+            if (substr($component, 0, 1) === DIRECTORY_SEPARATOR) {
+                $component = substr($component, 1);
+            }
+            $path .= (substr($path, -1) !== DIRECTORY_SEPARATOR ? DIRECTORY_SEPARATOR : '') . $component;
+        }
+        return $path;
+    }
+
+
+    /**
+     * Make sure a directory exists
+     * @param $path string directory path
+     * @throws \RuntimeException
+     * @return string given path
+     */
+    protected function ensureDirectory($path)
+    {
+        if (is_dir($path)) {
+            return $path;
+        }
+
+        if (@mkdir($path, 0777, true)) {
+            return $path;
+        }
+
+        throw new \RuntimeException(
+            sprintf(
+                'Failed to make sure directory "%s" exists.',
+                $path
+            )
+        );
     }
 }
